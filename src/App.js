@@ -4,26 +4,7 @@ import { useState } from 'react';
 import AddTask from "./componnents/AddTask";
 function App() {
   const [showAddTask, setShowAddTask] = useState(false)
-  const [tasks, setTask] = useState([
-    {
-        id: 1,
-        text: '吃早餐',
-        day: '7-25',
-        reminder: true,
-    },
-    {
-        id: 2,
-        text: '吃午餐',
-        day: '7-26',
-        reminder: true,
-    },
-    {
-        id: 3,
-        text: '吃晚餐',
-        day: '7-27',
-        reminder: false,
-    },
-]
+  const [tasks, setTask] = useState([]
   )
   const deleteTask = (id) =>{
     setTask(tasks.filter((task) => task.id !== id))
