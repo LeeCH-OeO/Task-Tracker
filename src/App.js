@@ -5,8 +5,7 @@ import {db} from "./Firebase"
 import { ListItem, ListItemText, Button } from "@material-ui/core";
 import { googleProvider } from "./authMethod";
 import SocialAuth from "./auth";
-
-
+import firebase from "firebase"
 
 
 function App() {
@@ -14,7 +13,7 @@ function App() {
   const [showAddTask, setShowAddTask] = useState(false)
   const [tasks, setTask] = useState([])
   useEffect(() => {
-    getData()
+    getData()       
   }, [])
   function getData(){
     db.collection("task").onSnapshot(function (querySnapshot){
@@ -23,18 +22,16 @@ function App() {
           id : doc.id,
           text: doc.data().task,
           day: doc.data().time,
-          reminder: doc.data().reminder
+          reminder: doc.data().reminder,
+          uid: doc.data().uid
         }))
       )
     })
-  }
-  const deleteTask = (id) =>{
-    db.collection("task").doc(id).delete()
 
   }
-  // const toggleReminder = (id) => {
-  //   setTask(tasks.map((task) => task.id ===id ? ({ ...task, reminder: !task.reminder}): task))
-  // }
+  const deleteTask = (id) =>{        
+    db.collection("task").doc(id).delete()
+  }
   const addTask = (task)=>{
     const id = Math.floor(Math.random()*10000) +1
     const newTask = {id,...task}
@@ -43,30 +40,30 @@ function App() {
       reminder: newTask.reminder,
       task: newTask.text,
       time: newTask.day,
+      uid: firebase.auth().currentUser.uid,
 
     })
   }
   const handleOnclick = async(provider)=>{
-    const res = await SocialAuth(provider)
-    console.log(res)
+    await SocialAuth(provider)
+    window.location.reload();
+   
   }
    return (
-     
     <div className="container">
       <Button onClick={()=>handleOnclick(googleProvider)} variant="contained" color="primary" size="small"git>
       login
       </Button>
       <Header name='Task Tracker' onAdd={() => setShowAddTask(!showAddTask)} showAdd= {showAddTask}/>
       {showAddTask &&<AddTask onAdd={addTask}/>}
-      {/* {tasks.length >0 ?(<Tasks tasks = {tasks} onDelete = {deleteTask} onToggle={toggleReminder} />) : ('No Task')} */}
       {dbTask.map(dbtask =>(
         <div style={{display: "flex"}}>
           <ListItem>
             <ListItemText primary={dbtask.text} secondary={(dbtask.day)+(dbtask.reminder ? ("🔔") : ("🔕"))}  />
           </ListItem>
-          <Button onClick={() => deleteTask(dbtask.id)}>X</Button>
-        </div>
-      ))}
+          <Button  onClick={() => 
+            ((firebase.auth().currentUser.uid===dbtask.uid) ? deleteTask(dbtask.id): alert("權限不足"))} >X</Button>
+        </div>))}
       
     </div>
   );
